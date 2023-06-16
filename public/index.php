@@ -12,6 +12,8 @@ use Dinta\Framework\Http\Response;
 
 define('BASE_PATH', $dirname);
 
+date_default_timezone_set('Asia/Makassar');
+
 
 $dotenv = Dotenv\Dotenv::createUnsafeImmutable($dirname);
 $dotenv->load();
@@ -29,3 +31,5 @@ $kernel = new Kernel();
 $response = $kernel->handle($request);
 
 $response->send();
+
+#composer run-script dev

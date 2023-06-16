@@ -29,6 +29,14 @@ class MitraController
     {
         // dd(urldecode($query));
         $result = $this->mitra->allQuery(urldecode($query));
+        for ($i = 0; $i < count($result); $i++) {
+            if (isset($result[$i]['disable'])) {
+                $result[$i]['disable'] = $result[$i]['disable'] == 0 ? false : true;
+            }
+            if (isset($result[$i]['is_open'])) {
+                $result[$i]['is_open'] = $result[$i]['is_open'] == 0 ? false : true;
+            }
+        }
         $response = json_encode([
             'success' => true,
             'result' => $result

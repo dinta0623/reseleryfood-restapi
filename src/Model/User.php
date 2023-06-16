@@ -159,29 +159,29 @@ class User extends Database
                 throw new Exception("Id tidak Valid");
             }
             if (isset($this->name)) {
-                $columns .= "name = '{$this->name}', ";
+                $columns .= "`name` = '{$this->name}', ";
             }
             if (isset($this->avatar)) {
-                $columns .= "avatar = '{$this->avatar}', ";
+                $columns .= "`avatar` = '{$this->avatar}', ";
             }
             if (isset($this->email)) {
                 if (!$this->validate("email")) {
                     throw new Exception("Tidak Valid");
                 }
-                $columns .= "email = '{$this->email}', ";
+                $columns .= "`email` = '{$this->email}', ";
             }
             if (isset($this->password)) {
                 $this->password = password_hash($this->password, PASSWORD_BCRYPT,  ['cost' => 10]);
-                $columns .= "password = '{$this->password}', ";
+                $columns .= "`password` = '{$this->password}', ";
             }
             if (isset($this->roles)) {
                 if (count($this->roles) > 0) {
                     $roles = implode(",", $this->roles);
                     $roles = "'{$roles}'";
-                    $columns .= "roles = {$roles}, ";
+                    $columns .= "`roles` = {$roles}, ";
                 } else {
                     $roles = 'NULL';
-                    $columns .= "roles = {$roles}, ";
+                    $columns .= "`roles` = {$roles}, ";
                 }
             }
             $this->updated_at = date('Y-m-d H:i:s');
@@ -190,7 +190,7 @@ class User extends Database
 
 
             // $columns .= "avatar = {$this->avatar}, ";
-            $columns .=  "updated_at = '{$this->updated_at}'";
+            $columns .=  "`updated_at` = '{$this->updated_at}'";
 
 
             $sql = "UPDATE {$this->table_name} SET {$columns} WHERE id = '{$id}'";

@@ -104,8 +104,15 @@ class Auth extends Database
                 unset($payload["avatar"]);
             }
 
+            $userId = $payload['id'];
+
+            $mitra = $this->query("SELECT * FROM mitra WHERE user_id = '{$userId}'");
+            if (isset($mitra) && count($mitra) > 0) {
+                $payload['mitra_id'] = $mitra['id'];
+            }
+
             $issuedAt   = new DateTimeImmutable();
-            $expire     = $issuedAt->modify('+50 minutes')->getTimestamp();
+            $expire     = $issuedAt->modify('+10 minutes')->getTimestamp();
 
 
             $payload = [
@@ -115,8 +122,6 @@ class Auth extends Database
                 'exp'  => $expire,                           // Expire
                 'payload' => $payload,                     // User data
             ];
-
-
             return JWT::encode($payload, $this->secretKeyAccess, $this->algo);
         } catch (\Throwable $th) {
             throw $th;
@@ -128,6 +133,12 @@ class Auth extends Database
         try {
             $result = $this->singleQuery("SELECT * FROM {$this->table_name} WHERE email = '{$email}'");
 
+            $userId = $result['id'];
+
+            $mitra = $this->query("SELECT * FROM mitra WHERE user_id = '{$userId}'");
+            if (isset($mitra) && count($mitra) > 0) {
+                $result['mitra_id'] = $mitra['id'];
+            }
             $payload = array(
                 "access_token" =>  $this->generateAccessToken($result),
                 "refresh_token" =>  $this->generateRefreshToken($result),

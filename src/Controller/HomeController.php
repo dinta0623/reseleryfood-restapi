@@ -13,7 +13,6 @@ class HomeController
             'success' => true,
             'message' => 'ping!',
         ]);
-        return new Response($content, 200);
 
         return new Response($content);
     }

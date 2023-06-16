@@ -20,6 +20,8 @@ class Mitra extends Database
     public ?string $logo;
     public ?string $lat;
     public ?string $lng;
+    public mixed $is_open;
+    public mixed $disable;
     public ?string $created_at;
     public ?string $updated_at;
     public array $errors = [];
@@ -44,6 +46,8 @@ class Mitra extends Database
         $this->logo = null;
         $this->lat = null;
         $this->lng = null;
+        $this->is_open = null;
+        $this->disable = null;
         $this->created_at = null;
         $this->updated_at = null;
         $this->resetValidation();
@@ -100,8 +104,13 @@ class Mitra extends Database
     public function findById(string $id): null | array | Exception
     {
         try {
-            $result = $this->singleQuery("SELECT * FROM {$this->table_name} WHERE id = '{$id}'");
-
+            $result = $this->singleQuery("SELECT _.*, __.name as pic FROM {$this->table_name} _ INNER JOIN users __ ON __.id = _.user_id WHERE _.id = '{$id}'");
+            if (isset($result['disable'])) {
+                $result['disable'] = (int) $result['disable'] == 0 ? false : true;
+            }
+            if (isset($result['is_open'])) {
+                $result['is_open'] = (int) $result['is_open'] == 0 ? false : true;
+            }
             return $result;
         } catch (\Throwable $th) {
             throw $th;
@@ -112,6 +121,14 @@ class Mitra extends Database
     {
         try {
             $result =  $this->allQuery("SELECT * FROM {$this->table_name}");
+            for ($i = 0; $i < count($result); $i++) {
+                if (isset($result[$i]['disable'])) {
+                    $result[$i]['disable'] = $result[$i]['disable'] == 0 ? false : true;
+                }
+                if (isset($result[$i]['is_open'])) {
+                    $result[$i]['is_open'] = $result[$i]['is_open'] == 0 ? false : true;
+                }
+            }
             return $result;
         } catch (\Throwable $th) {
             throw $th;
@@ -125,13 +142,17 @@ class Mitra extends Database
                 throw new Exception("Tidak Valid");
             }
 
+            $this->baseQuery("UPDATE users SET `roles` = 'mitra' WHERE `id`= '{$this->user_id}'");
+
             $uuid = (new Random())->uuidv4();
 
             $this->logo = isset($this->logo) ? "'{$this->logo}'" : 'NULL';
+            $this->is_open = isset($this->is_open) ? ($this->is_open == True ? 1 : 0) : 1;
+            $this->disable = isset($this->disable) ? ($this->disable == True ? 1 : 0) : 0;
             $this->created_at = date('Y-m-d H:i:s');
             $this->updated_at = $this->created_at;
 
-            $sql = "INSERT INTO {$this->table_name} VALUES ('{$uuid}', '{$this->user_id}','{$this->name}', '{$this->address}', '{$this->phone}', {$this->logo}, '{$this->lat}', '{$this->lng}', '{$this->created_at}', '{$this->updated_at}')";
+            $sql = "INSERT INTO {$this->table_name} VALUES ('{$uuid}', '{$this->user_id}','{$this->name}', '{$this->address}', '{$this->phone}', {$this->logo}, '{$this->lat}', '{$this->lng}', {$this->is_open}, {$this->disable}, '{$this->created_at}', '{$this->updated_at}')";
 
             // dd($sql);
             $this->clean();
@@ -151,30 +172,38 @@ class Mitra extends Database
         $id = $this->id;
         $columns = null;
         try {
-
             if (!isset($id)) {
                 throw new Exception("Id tidak Valid");
             }
             if (isset($this->name)) {
-                $columns .= "name = '{$this->name}', ";
+                $columns .= "`name` = '{$this->name}', ";
             }
             if (isset($this->user_id)) {
-                $columns .= "user_id = '{$this->user_id}', ";
+                $columns .= "`user_id` = '{$this->user_id}', ";
+                $this->baseQuery("UPDATE users SET `roles` = 'mitra' WHERE `id`= '{$this->user_id}'");
             }
             if (isset($this->address)) {
-                $columns .= "address = '{$this->address}', ";
+                $columns .= "`address` = '{$this->address}', ";
             }
             if (isset($this->phone)) {
-                $columns .= "phone = '{$this->phone}', ";
+                $columns .= "`phone` = '{$this->phone}', ";
             }
             if (isset($this->logo)) {
-                $columns .= "logo = '{$this->logo}', ";
+                $columns .= "`logo` = '{$this->logo}', ";
             }
             if (isset($this->lat)) {
-                $columns .= "lat = '{$this->lat}', ";
+                $columns .= "`lat` = '{$this->lat}', ";
             }
             if (isset($this->lng)) {
-                $columns .= "lng = '{$this->lng}', ";
+                $columns .= "`lng` = '{$this->lng}', ";
+            }
+            if (isset($this->disable)) {
+                $this->disable = $this->disable == True ? 1 : 0;
+                $columns .= "`disable` = {$this->disable}, ";
+            }
+            if (isset($this->is_open)) {
+                $this->is_open = $this->is_open == True ? 1 : 0;
+                $columns .= "`is_open` = {$this->is_open}, ";
             }
 
             $this->updated_at = date('Y-m-d H:i:s');

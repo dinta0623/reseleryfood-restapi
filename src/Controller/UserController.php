@@ -26,13 +26,30 @@ class UserController
                     }
 
                     $val = $request["getParams"][$key];
-                    $query .= "{$key} LIKE {$val}";
+
+                    if (strlen($val) <= 0) {
+                        continue;
+                    }
+
+                    if (str_contains($val, 'LIKE')) {
+                        $query .= "{$key} {$val}";
+                    } else {
+                        $query .= "{$key} LIKE {$val}";
+                    }
+                    // dd($query, $request["getParams"]);
                 }
+            }
+
+            if (strlen($query) > 0) {
+                $query = urldecode($query);
+                $query =  $this->user->allQuery("SELECT * FROM {$this->user->table_name} WHERE {$query}");
+            } else {
+                $query = $this->user->findAll();
             }
             // dd("SELECT * FROM {$this->user->table_name} WHERE {$query}");
             $result = json_encode([
                 'success' => true,
-                'result' => $this->user->allQuery("SELECT * FROM {$this->user->table_name} WHERE {$query}")
+                'result' => $query
             ]);
         } else {
             $result = json_encode([
@@ -44,6 +61,18 @@ class UserController
 
 
         return new Response($result);
+    }
+
+    public function custom($query, ...$args): Response
+    {
+        // dd(urldecode($query));
+        $result = $this->user->allQuery(urldecode($query));
+        $response = json_encode([
+            'success' => true,
+            'result' => $result
+        ]);
+
+        return new Response($response);
     }
 
     public function find($id, ...$args): Response
