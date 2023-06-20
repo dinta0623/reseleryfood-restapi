@@ -17,6 +17,7 @@ class User extends Database
     public ?string $avatar;
     public ?string $email;
     public ?string $password;
+    public ?string $mitra_id;
     public ?array $roles;
     public ?string $created_at;
     public ?string $updated_at;
@@ -40,6 +41,7 @@ class User extends Database
         $this->avatar = null;
         $this->email = null;
         $this->password = null;
+        $this->mitra_id = null;
         $this->roles = null;
         $this->created_at = null;
         $this->updated_at = null;
@@ -129,13 +131,17 @@ class User extends Database
             $this->created_at = date('Y-m-d H:i:s');
             $this->updated_at = $this->created_at;
 
+            if (!isset($this->mitra_id)) {
+                $this->mitra_id = 'NULL';
+            }
+
             $roles = 'NULL';
             if (isset($this->roles) && count($this->roles) > 0) {
                 $roles = implode(",", $this->roles);
                 $roles = "'{$roles}'";
             }
 
-            $sql = "INSERT INTO {$this->table_name} VALUES ('{$uuid}', '{$this->name}', '{$this->email}', {$this->avatar}, '{$password}', {$roles}, NULL, NULL, '{$this->created_at}', '{$this->updated_at}')";
+            $sql = "INSERT INTO {$this->table_name} VALUES ('{$uuid}', '{$this->name}', '{$this->email}', {$this->avatar}, '{$password}', {$roles}, '{$this->mitra_id}', NULL, '{$this->created_at}', '{$this->updated_at}')";
 
             $this->clean();
 

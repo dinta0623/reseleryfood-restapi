@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Model\Transaksi;
 use App\Model\Mitra;
 use App\Model\TransaksiItem;
+use App\Model\User;
 use App\Utility\JsonParser;
 use Dinta\Framework\Http\Response;
 
@@ -64,6 +65,9 @@ class TransaksiController
 
             $items = (new TransaksiItem())->findAllByTransaction($result[$i]['id']);
             $result[$i]['items'] = $items;
+
+            $user = (new User())->findById($result[$i]['user_id']);
+            $result[$i]['user'] = $user;
         }
         $response = json_encode([
             'success' => true,

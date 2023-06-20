@@ -175,6 +175,9 @@ class Transaksi extends Database
 
             $items = (new TransaksiItem())->findAllByTransaction($result['id']);
             $result['items'] = $items;
+
+            $user = (new User())->findById($result['user_id']);
+            $result['user'] = $user;
             return $result;
         } catch (\Throwable $th) {
             throw $th;
@@ -206,6 +209,9 @@ class Transaksi extends Database
 
                 $items = (new TransaksiItem())->findAllByTransaction($result[$i]['id']);
                 $result[$i]['items'] = $items;
+
+                $user = (new User())->findById($result[$i]['user_id']);
+                $result[$i]['user'] = $user;
             }
             return $result;
         } catch (\Throwable $th) {
